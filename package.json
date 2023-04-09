@@ -1,0 +1,18 @@
+{
+  "name": "bookshelf-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./src/server.js"
+  },
+  "author": "auliasalsabila",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/hapi": "^21.3.1",
+    "nanoid": "^3.3.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
