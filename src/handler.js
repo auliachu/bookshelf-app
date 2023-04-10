@@ -2,7 +2,7 @@ const books = require('./books');
 const {nanoid} = require('nanoid');
 
 //menyimpan buku
-const saveBookHandler = (request, h) =>{
+const addBookHandler = (request, h) =>{
     //ini didapatkan dari client
     const {title, authors, publisher, publishyear, pages, description }= request.payload;
 
@@ -59,7 +59,7 @@ const getBookByIdHandler = (request, h) => {
     //mendapatkan objek note dengan id tsbt berdasarkan object array books
     const book = books.filter((n)=> n.id===id)[0];
 
-    if(note!==undefined){
+    if(book!==undefined){
         return{
             status:'success',
             data: {
@@ -74,7 +74,7 @@ const getBookByIdHandler = (request, h) => {
     });
     response.code(404);
     return response;
-}
+};
 
 //mengubah buku berdasarkan id
 const editBookByIdHandler = (request, h)=>{
@@ -140,5 +140,5 @@ const deleteBookByIdHandler = (request, h)=>{
     return response;
 };
 
-module.exports={saveBookHandler, getAllBooksHandler, 
+module.exports={addBookHandler, getAllBooksHandler, 
     getBookByIdHandler, editBookByIdHandler, deleteBookByIdHandler};
