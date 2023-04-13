@@ -4,15 +4,49 @@ const {nanoid} = require('nanoid');
 //menyimpan buku
 const addBookHandler = (request, h) =>{
     //ini didapatkan dari client
-    const {title, authors, publisher, publishyear, pages, description }= request.payload;
+    const {name, year, author, summary, publisher, pageCount, readPage, reading }= request.payload;
 
     //ini cuma bisa diakses oleh server, jadi dibuat sendiri
-    const id = nanoid(12);
-    const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
+    const id = nanoid(16);
+    const insertedAt = new Date().toISOString();
+    const updatedAt = insertedAt;
+
+    //mengecek apakah buku sudah selesai dibaca
+    finished = (readPage===pageCount);
+
+    //menambahkan buku yang tidak ada nama
+    if(name === undefined){
+        const response = h.response({
+            status:'fail',
+            message:'Gagal menambahkan buku. Mohon isi nama buku',
+        });
+        response.code(400);
+        return response;
+    }
+
+    //menambahkan buku yang halaman baca lebih besar dari jumlah halaman
+    if(readPage>pageCount){
+        const response =h.response({
+            status:'fail',
+            message:'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
+        });
+        response.code(400);
+        return response;
+    }
 
     const newBook = {
-        title, authors, publisher, publishyear, pages, description, id, createdAt, updatedAt,
+        id,
+        name,
+        year,
+        author,
+        summary,
+        publisher,
+        pageCount,
+        readPage,
+        finished,
+        reading,
+        insertedAt,
+        updatedAt,
     };
 
     //masukkan nilai nya dengan push
@@ -45,12 +79,38 @@ const addBookHandler = (request, h) =>{
 
 
 //mengambil seluruh buku
-const getAllBooksHandler =()=>({
-    status:'success',
-    data: {
-        books,
-    },
-});
+const getAllBooksHandler =(request, h) =>{
+    const {name, reading, finished} = request.query;
+
+    let bukudiFilter = books;
+
+    if(name!== undefined){
+        bukudiFilter=bukudiFilter.filter((book)=>book.name !==undefined && book.name.toLowerCase().includes(name.toLowerCase()));
+    }
+
+    if(reading !== undefined){
+        const sudahBaca = Number.parseInt(reading, 10)===1;
+        bukudiFilter = bukudiFilter.filter((book)=>book.reading===sudahBaca);
+    }
+
+    if(finished !== undefined){
+        const sudahSelesai = Number.parseInt(finished, 10)=== 1;
+        bukudiFilter = bukudiFilter.filter((book)=> book.finished===sudahSelesai);
+    }
+
+    const response= h.response({
+        status:'success',
+        data : {
+            books: bukudiFilter.map((book)=>({
+                id: book.id,
+                name: book.name,
+                publisher: book.publisher,
+            })),
+        },
+    });
+    response.code(200);
+    return response;
+}
 
 //mengambil buku tertentu atau berdasarkan id
 const getBookByIdHandler = (request, h) => {
@@ -81,8 +141,30 @@ const editBookByIdHandler = (request, h)=>{
     const {id} = request.params;
 
     //dpatkan data notes terbaru yang dikirimkan client dengan body request
-    const { title, authors, publisher, publishyear, pages, description  } = request.payload;
-    const updatedAt = new Date().toISOString();
+    const { name, year, author, summary, publisher, pageCount, readPage, reading } = request.payload;
+    const insertedAt = new Date().toISOString();
+    const updatedAt = insertedAt;
+    const finished = (readPage===pageCount);
+
+    //menambahkan buku yang tidak ada nama
+    if(name === undefined){
+        const response = h.response({
+            status:'fail',
+            message:'Gagal memperbarui buku. Mohon isi nama buku',
+        });
+        response.code(400);
+        return response;
+    }
+
+    //menambahkan buku yang halaman baca lebih besar dari jumlah halaman
+    if(readPage>pageCount){
+        const response =h.response({
+            status:'fail',
+            message:'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
+        });
+        response.code(400);
+        return response;
+    }
 
     //mendapatkan index array pada object buku sesuai id yang ditentukan
     const index= books.findIndex((book)=>book.id===id);
@@ -91,13 +173,14 @@ const editBookByIdHandler = (request, h)=>{
     if(index !== -1){
         books[index]={
             ...books[index],
-            title, 
-            authors, 
-            publisher, 
-            publishyear, 
-            pages, 
-            description, 
-            updatedAt,
+            name,
+            year,
+            author,
+            summary,
+            publisher,
+            pageCount,
+            readPage,
+            reading,
         };
         const response = h.response({
             status:'success',
